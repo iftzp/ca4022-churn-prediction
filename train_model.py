@@ -5,11 +5,6 @@ import sys
 import boto3
 from google.cloud import storage
 
-# from google_drive_downloader import GoogleDriveDownloader as gdd
-
-# sys.path.append('/usr/local/lib/python3.7/dist-packages')
-# sys.path.append('/miniconda3/envs/my_env/lib/python3.6/site-packages')
-
 
 os.environ["JAVA_HOME"] = "/usr/lib/jvm/java-8-openjdk-amd64"
 os.environ["SPARK_HOME"] = "spark-3.0.1-bin-hadoop2.7"   # path + xxxxxxx
@@ -56,7 +51,7 @@ pd.set_option('max_colwidth', None)
 
 
 
-
+# define functions
 
 def fit_predict(train, test, model):
   mdls = {
@@ -119,7 +114,7 @@ def other_eval(model, test_data):
     return metrics
 
 
-
+# start session
 
 from pyspark.sql import SparkSession
 spark = SparkSession.builder.appName('sparkify')\
@@ -133,7 +128,7 @@ spark = SparkSession.builder.appName('sparkify')\
 # buck = s3r.Bucket('udacity-dsnd')
 # buck.download_file("sparkify/sparkify_event_data.json", "large_sparkify_event_data.json")
 
-
+# read in data
 
 df = spark.read.json(file_path)
 
@@ -176,8 +171,6 @@ df = df.filter(col('auth')!='LoggedOut')
 # we just want the state - other location information is too specific. we split the cells on the comma and take the second value
 df = df.withColumn('location', split(col('location'),',').getItem(1))
 
-# inspect our new columns - would ideally only print the new ones here
-# print(pd.DataFrame(df.take(5), columns=[['interaction_time', 'month', 'date', 'location']]).head())
 print(pd.DataFrame(df.take(5), columns=df.columns).head())
 
 
@@ -194,8 +187,6 @@ label_df = df.withColumn('label',
 # we will now join this label column to our existing dataframe on userId
 df = df.join(label_df, on='userId')
 
-# inspect our new column again - would ideally only print the new one
-# print(pd.DataFrame(df.take(5), columns=[['label']]).head())
 print(pd.DataFrame(df.take(5), columns=df.columns).head())
 
 
@@ -224,11 +215,6 @@ avg_length_df = df.groupBy('userId').avg('length').withColumnRenamed('avg(length
 # attach average session length to our other extracted features
 extracted_df = extracted_df.join(avg_length_df, on='userId')
 
-# if we group by userid, date and sessionid we can get an average session length for each user
-# get start and end of each session
-# assign the difference in seconds to a new column called session_duration_sec
-# group this by date
-# get the average for the day
 daily_session_duration_df = df.groupby('userId','date','sessionId')\
 .agg(max('ts').alias('session_end'), min('ts').alias('session_start'))\
 .withColumn('session_duration_sec', (col('session_end')-col('session_start'))*0.001)\
