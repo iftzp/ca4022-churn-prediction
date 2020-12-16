@@ -17,7 +17,7 @@ export BUCKET_NAME="ca4022-files"
 
 
 # run pyspark job pointing to python 3 drivers
-gcloud dataproc jobs submit pyspark train_model_sparkify.py \
+gcloud dataproc jobs submit pyspark train_model.py \
     --cluster=${CLUSTER} \
     --region=${REGION} \
     --properties="spark.pyspark.python=python3.8,spark.pyspark.driver.python=python3.8" \

@@ -71,31 +71,6 @@ spark = SparkSession.builder.appName('sparkify')\
 df = spark.read.json(file_path)
 
 
-def cleanse_data(df):
-
-    # cleanse stringtype fields from special characters
-    for field in df.schema.fields:
-        if field.dataType==StringType():
-            df = df.withColumn(field.name, regexp_replace(field.name, r'[^a-zA-Z0-9\,\-]', ''))
-            
-    # create new ts related columns
-    df = df.withColumn('interaction_time', from_unixtime(col('ts').cast(LongType())/1000).cast(TimestampType()))
-    df = df.withColumn('month', month(col('interaction_time')))
-    df = df.withColumn('date', from_unixtime(col('ts')/1000).cast(DateType()))
-
-    #df = df.drop('ts')
-    
-    df = df.withColumn('userId', col('userId').cast(LongType()))
-    # remove user id null
-    df = df.filter(col('userId').isNotNull())
-    # filter out log out records
-    df = df = df.filter(col('auth')!='LoggedOut')
-    # replace location with extracting state from it
-    df = df.withColumn('location', split(col('location'),',').getItem(1))
-    
-    return df
-
-
 
 def make_churn_labels(df):
    
@@ -431,15 +406,16 @@ for rw in noderows:
       nc='g'
     else:
       nc='r'
-    G.add_node(rw['id'], cat="Prediction", predval=rw['prediction'], disp_label=rw['prediction'], node_color=nc)
+    G.add_node(rw['id'], cat="Prediction", predval=rw['prediction'], disp_label=pred_labels[int(rw['prediction'])], node_color=nc)
   else:
     G.add_node(rw['id'], cat="splitter", featureIndex=rw['split']['featureIndex'], thresh=rw['split']['leftCategoriesOrThreshold'], leftChild=rw['leftChild'], rightChild=rw['rightChild'], numCat=rw['split']['numCategories'], disp_label=feats[rw['split']['featureIndex']], node_color='w')
 
 # second pass to add the relationships, now with additional information
 for rw in modeldf.where("leftChild > 0 and rightChild > 0").collect():
-  tempnode = G.nodes()[rw['id']]
-  G.add_edge(rw['id'], rw['leftChild'], reason="{0} less than {1}".format(feats[tempnode['featureIndex']],tempnode['thresh']))
-  G.add_edge(rw['id'], rw['rightChild'], reason="{0} greater than {1}".format(feats[tempnode['featureIndex']],tempnode['thresh']))
+    tempnode = G.nodes()[rw['id']]
+    G.add_edge(rw['id'], rw['leftChild'], reason="{0}\n <\n {1}".format(feats[tempnode['featureIndex']],tempnode['thresh']))
+    G.add_edge(rw['id'], rw['rightChild'], reason="{0}\n \n {1}".format(feats[tempnode['featureIndex']],tempnode['thresh']))
+
 
 def hierarchy_pos(G, root=None, width=1., vert_gap = 0.2, vert_loc = 0, xcenter = 0.5):
 
@@ -477,11 +453,23 @@ def hierarchy_pos(G, root=None, width=1., vert_gap = 0.2, vert_loc = 0, xcenter 
 
 import matplotlib.pyplot as plt
 
-plt.figure(figsize=(13,13))
-
+f = plt.figure(figsize=(20,20))
 pos = hierarchy_pos(G, root=0, width=2)
-nxlabels = nx.get_node_attributes(G, 'disp_label')
-nx.draw(G, pos=pos, labels=nxlabels, with_labels=True)
+node_labels = nx.get_node_attributes(G, 'disp_label')
+node_colors = nx.get_node_attributes(G, 'node_color')
+node_colors = list(node_colors.values())
+edge_labels = nx.get_edge_attributes(G,'reason')
+formatted_edge_labels = {(elem[0],elem[1]):edge_labels[elem] for elem in edge_labels}
+# node shape can be one of ‘so^>v<dph8’ 
+nx.draw_networkx(G, pos=pos, labels=node_labels, node_color=node_colors, node_shape='v', with_labels=True)
+nx.draw_networkx_edge_labels(G,pos,edge_labels=formatted_edge_labels,font_color='black', bbox=dict(boxstyle='round4', fc='white', pad=0.6))
+
+
+# plt.figure(figsize=(13,13))
+
+# pos = hierarchy_pos(G, root=0, width=2)
+# nxlabels = nx.get_node_attributes(G, 'disp_label')
+# nx.draw(G, pos=pos, labels=nxlabels, with_labels=True)
 
 gname = "gs://ca4022-files/output"
 f.savefig("decision_tree_graph.png")
