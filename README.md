@@ -1,4 +1,4 @@
-# ca4022-churn-prediction
+# Customer Churn Prediction
 
 This was a project I completed in my final year of college with my friend Jack. We chose a customer churn dataset and built a churn prediction model.
 
