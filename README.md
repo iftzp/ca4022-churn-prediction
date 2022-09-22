@@ -1,5 +1,8 @@
 # ca4022-churn-prediction
 
+This was a project I completed in my final year of college with my friend Jack. We chose a customer churn dataset and built a churn prediction model.
+
+
 Collection of source code used in analysis of customer churn data and development of churn prediction models.
 
 Our [Google Colab Notebook](https://colab.research.google.com/drive/1wP79Bl_drwIgtKXRcWYzaPTLBNNQocnV?usp=sharing) explains much of the detail contained in the source code.
