@@ -1,6 +1,6 @@
 # Customer Churn Prediction
 
-This was a project I completed in my final year of college with my friend Jack. We chose a customer churn dataset and built a churn prediction model.
+This was a project I completed in my final year of college with my friend Jack. We chose a customer churn dataset and built a churn prediction model for this project.
 
 
 Collection of source code used in analysis of customer churn data and development of churn prediction models.
