@@ -5,7 +5,7 @@
 
 # set project id
 gcloud config set project "xenon-bivouac-298214"
-gcloud config set account "jack.boylan25@mail.dcu.ie"
+gcloud config set account "your account"
 
 # set environment variables
 export CLOUDSDK_PYTHON=python3 
