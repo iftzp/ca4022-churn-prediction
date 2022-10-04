@@ -1,7 +1,7 @@
 # Customer Churn Prediction
 
 This was a project I completed in my final year of college with my friend Jack. We chose a customer churn dataset and built a churn prediction model for this project.
-
+We were awarded a grade of 83%.
 ______________________________
 
 
